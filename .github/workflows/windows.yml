@@ -144,10 +144,17 @@ jobs:
         if: ${{ matrix.os == 'windows-2022' && matrix.torch-version == '2.2.1' && matrix.cmake-build-type == 'Release' }}
         uses: actions/upload-artifact@v4
         with:
+          # upstream saved Linux paths here (build/opensplat, *.so) which do
+          # not exist on Windows runners, so the artifact was always empty.
+          # Bundle the exes plus every runtime DLL (libtorch shared-with-deps
+          # includes the CUDA libs) so the artifact runs standalone on any
+          # machine with an NVIDIA driver.
+          name: opensplat-windows-cuda
           path: |
-            build/libgsplat.so
-            build/opensplat
-            build/simple_trainer
+            build/Release/
+            build/*.exe
+            build/*.dll
+            libtorch/lib/*.dll
 
       - name: Clean Compiler Cache
         shell: pwsh
